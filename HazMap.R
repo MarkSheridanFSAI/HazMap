@@ -118,3 +118,25 @@ sample_map_2
 
 
 
+
+# -------------------
+
+
+storm_center <- st_sfc(st_point(c(-8.5, 53.5)), crs = 4326)
+windstorm_area <- st_buffer(storm_center, dist = units::set_units(50, "km"))
+
+sample_map_3 <- sample_map_2 +
+    geom_sf(data = windstorm_area, fill = "red", alpha = 0.3) 
+
+policies_hit <- sample_data_sf %>%
+  filter(st_within(geometry, windstorm_area, sparse = FALSE))
+
+sample_map_4 <- sample_map_3 +
+geom_sf(data = windstorm_area, fill = "red", alpha = 0.3) +  # Windstorm area
+  #geom_sf(data = sample_data_sf, aes(color = "All Policies"), size = 1) +
+  geom_sf(data = policies_hit, color = "blue", size = 2) +  # Affected policies
+  labs(title = "Simulated Windstorm and Affected Policies",
+       subtitle = "Affected policies shown in blue",
+       color = "Legend") +
+  theme_minimal()
+sample_map_4
