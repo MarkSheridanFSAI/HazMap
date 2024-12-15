@@ -48,3 +48,73 @@ county_map <- map + coord_sf(
   ggtitle(county_name)
 
 county_map
+
+
+
+# -----------------------------------------------------------------------------
+
+
+file_path <- "C:/Users/Admin/OneDrive/Documents/GitHub/HazMap/www/sample_dataframe_ireland.csv"
+sample_data <- read.csv(file_path, stringsAsFactors = FALSE)
+
+
+
+# -----------what points fall in the dangerzone
+sample_data_sf <- sample_data %>%
+  mutate(longitude_orig = longitude,
+         latitude_orig = latitude) %>%
+  st_as_sf(coords = c("longitude_orig", "latitude_orig"), crs = 4326)
+
+#points_in_danger <- sample_data_sf %>%  filter(st_within(geometry, danger_zone, sparse = FALSE))
+
+points_in_flood_danger <- sample_data_sf %>%
+  filter(
+    lengths(st_within(geometry, danger_zone)) > 0 |
+      lengths(st_within(geometry, coastal_danger_zone)) > 0)
+
+
+# ---------------- show points on map
+
+sample_map <- points_in_flood_danger %>%  # sample_data , points_in_danger
+    leaflet() %>%
+      addTiles() %>%  
+      addCircleMarkers(
+        lng = ~longitude, 
+        lat = ~latitude,  
+        popup = ~paste("Policy Id:", policy_id, "<br>",
+                       "Category 1:", category_1, "<br>",
+                       "Category 2:", category_2, "<br>",
+                       "Premium:", premium, "<br>",
+                       "Sum Insured:", sum_insured),
+        radius = 5, 
+        color = "blue",
+        fillOpacity = 0.7
+      ) %>%
+      setView(lng = -8, lat = 53.5, zoom = 8)  
+
+sample_map
+
+# ------------------------
+
+sample_map_2 <- map +
+  geom_point(
+    data = points_in_flood_danger,
+    aes(x = longitude, y = latitude, color = category_1, shape = category_2),
+    size = 2,  
+    alpha = 0.7  
+  ) +
+  scale_color_manual(values = c("personal" = "blue", "commercial" = "red")) + 
+  theme_minimal() +
+  labs(
+    title = "Sample Data Points on Ireland Map",
+    subtitle = "Categorized by Category 1 and Category 2",
+    x = "Longitude",
+    y = "Latitude",
+    color = "Category 1",
+    shape = "Category 2"
+  )
+
+sample_map_2
+
+
+

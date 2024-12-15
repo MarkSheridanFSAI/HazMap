@@ -6,3 +6,6 @@ library(dplyr)
 #remotes::install_github("ropensci/rnaturalearthhires")
 library(rnaturalearthhires)
 library(ggspatial)
+
+
+library(leaflet)
